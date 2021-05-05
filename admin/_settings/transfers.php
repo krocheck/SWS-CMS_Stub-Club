@@ -100,7 +100,7 @@ class AdminTransfers extends Command
 		$count      = array();
 		$pageWhere  = '';
 		$queryWhere = '';
-		$modules    = array( 'transactions' => "Transactions Update", 'transactions_manual' => "Manual Transaction Batch", 'items' => "Menu Items Update", 'prices' => "Menu Item Active Prices Update", 'rewards' => "Reward Transactions Processed" );
+		$modules    = array( 'transactions' => "Transactions Update", 'transactions_manual' => "Manual Transaction Batch", 'items' => "Menu Items Update", 'prices' => "Menu Item Active Prices Update", 'rewards' => "Reward Transactions Processed", 'menu' => "Toast Full Menu" );
 
 		//-----------------------------------------
 		// Do we need to do something else first?

@@ -28,7 +28,7 @@ class ApiApp extends Application
 	 */
 	protected function doExecute( $params )
 	{
-
+		$this->registry->overrideSetting('cookie_enable', 0);
 	}
 
 	/**

@@ -122,6 +122,10 @@ class SpoolerApp extends Application
 				require_once( SWS_ROOT_PATH . 'spooler/_items/default.php' );
 				$module = new SpoolerItems();
 				break;
+			case 'menu':
+				require_once( SWS_ROOT_PATH . 'spooler/_menu/default.php' );
+				$module = new SpoolerMenu();
+				break;
 			case 'categories':
 				require_once( SWS_ROOT_PATH . 'spooler/_categories/default.php' );
 				$module = new SpoolerCategories();

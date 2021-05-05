@@ -147,6 +147,7 @@ class AdminSettings extends Command
 		$settings['toast_orders']           = trim( $this->input['toast_orders'] );
 		$settings['toast_config']           = trim( $this->input['toast_config'] );
 		$settings['toast_crm']              = trim( $this->input['toast_crm'] );
+		$settings['toast_menus']            = trim( $this->input['toast_menus'] );
 
 		//--------------------------------------------
 		// Checks...
@@ -457,6 +458,13 @@ class AdminSettings extends Command
 			array(
 				$this->lang->getString('settings_toast_crm'),
 				$this->html->formInput( 'toast_crm', $this->registry->txtStripslashes( $_POST['toast_crm'] ? $_POST['toast_crm'] : $settings['toast_crm'] ) )
+			)
+		);
+
+		$html .= $this->html->addTdRow(
+			array(
+				$this->lang->getString('settings_toast_menus'),
+				$this->html->formInput( 'toast_menus', $this->registry->txtStripslashes( $_POST['toast_menus'] ? $_POST['toast_menus'] : $settings['toast_menus'] ) )
 			)
 		);
 

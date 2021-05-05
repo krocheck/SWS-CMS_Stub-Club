@@ -51,7 +51,8 @@ class ToastAPI extends Command
 			'auth'    => $this->registry->getSetting('toast_auth'),
 			'orders'  => $this->registry->getSetting('toast_orders'),
 			'config'  => $this->registry->getSetting('toast_config'),
-			'crm'     => $this->registry->getSetting('toast_crm')
+			'crm'     => $this->registry->getSetting('toast_crm'),
+			'menus'   => $this->registry->getSetting('toast_menus')
 		);
 
 		$this->location = $this->registry->getSetting('toast_location');
@@ -73,12 +74,13 @@ class ToastAPI extends Command
 
 		$curl2 = curl_init();
 		$url = $this->apiURL . $this->endpoints['auth'];
-		$parameters = "grant_type=client_credentials&client_id={$this->clientID}&client_secret={$this->config['toast_secret']}";
+
 
 		curl_setopt($curl2, CURLOPT_POST, true);
-		curl_setopt($curl2, CURLOPT_POSTFIELDS, $parameters);
 
 		curl_setopt($curl2, CURLOPT_URL, $url);
+		curl_setopt($curl2, CURLOPT_HTTPHEADER, array( "Content-Type: application/json" ) );
+		curl_setopt($curl2, CURLOPT_POSTFIELDS, json_encode( array( "clientId" => "prod-cust-stubbysgastropub", "clientSecret" => "3Oay5PoKh5fGcJuY1DBC", "userAccessType" => "TOAST_MACHINE_CLIENT" ) ) );
 		curl_setopt($curl2, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($curl2, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt($curl2, CURLOPT_SSL_VERIFYHOST, 2);
@@ -92,9 +94,9 @@ class ToastAPI extends Command
 		{
 			$result = json_decode( $result, TRUE );
 
-			if ( is_array( $result ) & isset( $result['access_token'] ) )
+			if ( is_array( $result ) & isset( $result['token'] )  & isset( $result['token']['accessToken'] ) )
 			{
-				$this->token = $result['access_token'];
+				$this->token = $result['token']['accessToken'];
 				$this->registry->updateSetting( 'toast_token', $this->token );
 				$out = TRUE;
 			}
@@ -250,6 +252,32 @@ class ToastAPI extends Command
 		// 48 bits for "node"
 		mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
 		);
+	}
+
+	/**
+	 * Call the Toast API to retrieve the Menu
+	 *
+	 * @return array the menu
+	 * @access public
+	 * @since 1.0.0
+	*/
+	public function getMenu()
+	{
+		$out = array();
+		$this->toastDB->query("SELECT menu_data FROM menu;");
+
+		if ( $this->toastDB->getTotalRows() )
+		{
+			while( $row = $this->toastDB->fetchRow() )
+			{
+				if ( isset( $row['menu_data'] ) && strlen( $row['menu_data'] ) > 0 )
+				{
+					$out = unserialize($row['menu_data']);
+				}
+			}
+		}
+
+		return $out;
 	}
 
 	/**
@@ -1413,6 +1441,62 @@ class ToastAPI extends Command
 			}
 
 			$this->cache->update('discounts');
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Call the Toast API to retrieve the menu
+	 * 
+	 * @return bool success
+	 * @access public
+	 * @since 1.0.0
+	 */
+	public function updateMenu()
+	{
+		$this->toastDB->query("SELECT last_modified FROM menu;");
+		$lastKnown = 0;
+		$count = 0;
+
+		if ( $this->toastDB->getTotalRows() )
+		{
+			while( $row = $this->toastDB->fetchRow() )
+			{
+				if ( isset( $row['last_modified'] ) )
+				{
+					$lastKnown = strtotime($row['last_modified']);
+				}
+			}
+		}
+
+		$meta = $this->callGet('menus',"/metadata");
+
+		if ( is_array($meta) && isset( $meta['lastUpdated'] ) )
+		{
+			$lastUpdated = strtotime(date_create( $meta['lastUpdated'] )->format("Y-m-d H:i:s"));
+
+			if ( $lastUpdated > $lastKnown)
+			{
+				$menu = $this->callGet('menus', "/menus");
+
+				if ( is_array($menu) && isset( $menu['menus'] ) )
+				{
+					$count = 1;
+					$new = array(
+						'last_modified' => date("Y-m-d H:i:s", $lastUpdated),
+						'menu_data' => mysql_real_escape_string( serialize($menu['menus']) )
+					);
+					$this->toastDB->query("DELETE FROM menu;");
+					$this->toastDB->query("INSERT INTO `menu` (last_modified, menu_data) VALUES ('{$new['last_modified']}',\"{$new['menu_data']}\");");
+					$this->DB->query("INSERT INTO logs (type,total,result,date_time) VALUES ('menu',1,1,'".date("Y-m-d H:i:s")."');");
+
+				}
+			}
+			else
+			{
+				$count = -1;
+			}
 		}
 
 		return $count;

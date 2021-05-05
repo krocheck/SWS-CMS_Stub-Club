@@ -28,6 +28,7 @@ $lang['settings_toast_auth']           = "<strong>Toast Auth Endpoint</strong>";
 $lang['settings_toast_orders']         = "<strong>Toast Orders Endpoint</strong>";
 $lang['settings_toast_config']         = "<strong>Toast Config Endpoint</strong>";
 $lang['settings_toast_crm']            = "<strong>Toast CRM Endpoint</strong>";
+$lang['settings_toast_menus']          = "<strong>Toast Menus Endpoint</strong>";
 $lang['settings_untappd_url']          = "<strong>Untappd API URL</strong>";
 $lang['settings_untappd_account']      = "<strong>Untappd Account</strong>";
 $lang['settings_untappd_read_only']    = "<strong>Untappd Read-Only Key</strong>";

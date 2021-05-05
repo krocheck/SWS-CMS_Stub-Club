@@ -4,7 +4,7 @@
  * SWS-CMS System
  *  - Simna Web Services Programming Team
  * 
- * Spooler Auto Exec Processor
+ * Spooler Transaction Processor
  * Last Updated: $Date: 2010-06-28 21:31:06 -0500 (Mon, 28 Jun 2010) $
  *
  * @author		$Author: krocheck $
@@ -16,7 +16,7 @@
  * @version		$Revision: 27 $
  */
 
-class SpoolerAuto extends Command
+class SpoolerMenu extends Command
 {
 	/**
 	 * The main execute function
@@ -28,15 +28,19 @@ class SpoolerAuto extends Command
 	 */
 	protected function doExecute( $params )
 	{
-		$this->registry->getAPI('toast')->updateCategories();
-		$this->registry->getAPI('toast')->updateDiscounts();
-		$this->registry->getAPI('toast')->updateMenu();
-		$this->registry->getAPI('toast')->updateMenuItems();
-		$this->registry->getAPI('toast')->updateActiveMenuItems();
-		$this->registry->getAPI('toast')->updateOrders();
-		$this->registry->getAPI('toast')->processRewards();
+		if ( $this->registry->getAPI('toast')->updateMenu() > 0 )
+		{
+			$this->display->addJSON( 'status', 'complete' );
+		}
+		else if ( $this->registry->getAPI('toast')->updateMenu() < 0 )
+		{
+			$this->display->addJSON( 'status', 'up to date' );
+		}
+		else
+		{
+			$this->display->addJSON( 'status', 'error' );
+		}
 
-		$this->display->addJSON( 'status', 'complete' );
 		$this->display->doJSON();
 	}
 }
